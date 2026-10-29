@@ -1,0 +1,35 @@
+# Vérifications automatiques sur chaque pull request et chaque push sur main.
+# La PR ne peut être fusionnée que si ce job est vert (protection de main).
+# Le nom du job « Lint, format et tests » est celui déclaré dans la protection : ne pas le changer.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  qualite:
+    name: Lint, format et tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Installer les dépendances
+        run: pip install -r requirements-dev.txt
+
+      - name: PEP 8 et erreurs (ruff, QC-01)
+        run: ruff check .
+
+      - name: Formatage (ruff format)
+        run: ruff format --check .
+
+      - name: Tests unitaires (pytest)
+        run: pytest -q
