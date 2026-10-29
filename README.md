@@ -87,9 +87,9 @@ Ajouts par rapport à l'annexe B : `tests/`, `requirements-dev.txt`, `pyproject.
 
 | Nom | Rôle | GitHub |
 | --- | --- | --- |
-| *Mohamed Ali BAMBA* | Chef de projet | |
-|MALTA TENDE Gertrude Arianne | Responsable données | |
-|N’SOUGAN Kossigan Arsene | Responsable dépôt | |
-| Etoune Dieudonne | Responsable restitution | |
+| *Mohamed Ali BAMBA* | Chef de projet |https://github.com/Ali77225 |
+|MALTA TENDE Gertrude Arianne | Responsable données |https://github.com/maltaarianne6-sudo |
+|N’SOUGAN Kossigan Arsene | Responsable dépôt |https://github.com/nsgarsene-coder |
+| Etoune Dieudonne | Responsable restitution |https://github.com/dicoretoune5-maker |
 
 Règles de travail : [`CONTRIBUTING.md`](CONTRIBUTING.md).
