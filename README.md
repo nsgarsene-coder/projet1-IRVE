@@ -25,9 +25,11 @@ Version proposée, en attente de validation par le commanditaire. Détail et his
 | Source | Producteur | Licence | Date de téléchargement | Périmètre retenu |
 | --- | --- | --- | --- | --- |
 | [Fichier consolidé des bornes de recharge (IRVE)](https://www.data.gouv.fr/fr/datasets/fichier-consolide-des-bornes-de-recharge-pour-vehicules-electriques/) | Aménageurs, consolidé par data.gouv.fr | Licence Ouverte Etalab 2.0 | 2026-11-03 | Calvados (14) + comparaison nationale |
-| Populations légales par commune | INSEE | Licence Ouverte Etalab 2.0 | *(à compléter)* | Communes du Calvados |
+| [Populations de référence 2023, en vigueur au 1er janvier 2026](https://www.data.gouv.fr/datasets/populations-de-reference) | INSEE | Licence Ouverte Etalab 2.0 | 2026-11-03 | Communes du Calvados (population municipale) |
 
-Les données ne sont pas versionnées (`data/` est dans `.gitignore`) : elles se récupéreront avec un script de téléchargement.
+Les données ne sont pas versionnées (`data/` est dans `.gitignore`) : `python -m src.download` les
+récupère dans `data/raw/` et note l'URL, la date et la taille de chaque fichier dans
+`data/raw/sources.csv`.
 
 ## Installation
 
@@ -54,7 +56,13 @@ pytest
 
 ## Reproduire l'analyse
 
-*(à compléter au fil du projet : téléchargement, nettoyage, notebook, tableau de bord)*
+1. Télécharger les données : `python -m src.download` (environ 95 Mo).
+
+*(étapes suivantes à compléter au fil du projet : nettoyage, notebook, tableau de bord)*
+
+Si le téléchargement échoue avec `CERTIFICATE_VERIFY_FAILED`, un antivirus inspecte
+probablement le trafic HTTPS (c'est le cas d'Avast). Ajoutez `data.gouv.fr` et `api.insee.fr`
+aux exceptions de son agent Web, ou désactivez temporairement l'analyse HTTPS.
 
 ## Structure du dépôt
 
