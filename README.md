@@ -1,6 +1,6 @@
 # Bornes de recharge électrique : où financer les prochaines ?
 
-[![CI](https://github.com/nsgarsene-coder/projet1-Equipe_bornes_de_recharges/actions/workflows/ci.yml/badge.svg)](https://github.com/nsgarsene-coder/projet1-Equipe_bornes_de_recharges/actions/workflows/ci.yml)
+[![CI](https://github.com/nsgarsene-coder/projet1-IRVE/actions/workflows/ci.yml/badge.svg)](https://github.com/nsgarsene-coder/projet1-IRVE/actions/workflows/ci.yml)
 
 ## Contexte
 
@@ -34,8 +34,8 @@ Les données ne sont pas versionnées (`data/` est dans `.gitignore`) : elles se
 Python 3.11 ou plus.
 
 ```bash
-git clone https://github.com/nsgarsene-coder/projet1-Equipe_bornes_de_recharges.git
-cd projet1-Equipe_bornes_de_recharges
+git clone https://github.com/nsgarsene-coder/projet1-IRVE.git
+cd projet1-IRVE
 python -m venv .venv
 source .venv/bin/activate        # Windows : .venv\Scripts\activate
 pip install -r requirements-dev.txt
