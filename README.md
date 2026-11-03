@@ -4,7 +4,7 @@
 
 ## Contexte
 
-- **Commanditaire** : syndicat départemental d'énergie qui prépare son schéma directeur des bornes de recharge.
+- **Commanditaire** : SDEC Énergie, syndicat départemental d'énergies du Calvados, qui prépare son schéma directeur des bornes de recharge.
 - **Question posée** : « Avant de financer de nouvelles bornes, nous voulons savoir où sont les zones blanches, quelle puissance est disponible et à quel rythme le réseau s'est développé ces dernières années. »
 - **Sujet retenu** : annexe A, n° 9, Bornes de recharge électrique (Projet 1 DIA2, CDC-DIA2-UE01-2026).
 
@@ -24,8 +24,8 @@ Version proposée, en attente de validation par le commanditaire. Détail et his
 
 | Source | Producteur | Licence | Date de téléchargement | Périmètre retenu |
 | --- | --- | --- | --- | --- |
-| [Fichier consolidé des bornes de recharge (IRVE)](https://www.data.gouv.fr/fr/datasets/fichier-consolide-des-bornes-de-recharge-pour-vehicules-electriques/) | Aménageurs, consolidé par data.gouv.fr | Licence Ouverte Etalab 2.0 | *(à compléter)* | Département *(à choisir)* + comparaison nationale |
-| Populations légales par commune | INSEE | Licence Ouverte Etalab 2.0 | *(à compléter)* | Communes du département |
+| [Fichier consolidé des bornes de recharge (IRVE)](https://www.data.gouv.fr/fr/datasets/fichier-consolide-des-bornes-de-recharge-pour-vehicules-electriques/) | Aménageurs, consolidé par data.gouv.fr | Licence Ouverte Etalab 2.0 | 2026-11-03 | Calvados (14) + comparaison nationale |
+| Populations légales par commune | INSEE | Licence Ouverte Etalab 2.0 | *(à compléter)* | Communes du Calvados |
 
 Les données ne sont pas versionnées (`data/` est dans `.gitignore`) : elles se récupéreront avec un script de téléchargement.
 
