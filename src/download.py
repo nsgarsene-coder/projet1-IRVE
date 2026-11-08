@@ -1,80 +1,60 @@
-"""Téléchargement des données sources (fichier IRVE consolidé, populations INSEE).
+"""app/dashboard.py - Tableau de bord décisionnel IRVE."""
 
-Usage : python -m src.download
-"""
-
-import csv
-import zipfile
-from datetime import datetime
 from pathlib import Path
 
-import requests
+import pandas as pd
+import seaborn as sns
+import streamlit as st
 
-RACINE = Path(__file__).resolve().parent.parent
-DOSSIER_BRUT = RACINE / "data" / "raw"
-JOURNAL = DOSSIER_BRUT / "sources.csv"
+from src.indicators import (
+    compute_kpis,
+    compute_power_distribution,
+    compute_temporal_evolution,
+)
 
-SOURCES = {
-    # Lien permanent data.gouv.fr : redirige toujours vers la dernière consolidation.
-    "irve": {
-        "url": "https://www.data.gouv.fr/fr/datasets/r/eb76d20a-8501-400e-b336-d85724de5435",
-        "fichier": "irve_consolide.csv",
-    },
-    # Populations de référence 2023, en vigueur au 1er janvier 2026.
-    "insee": {
-        "url": "https://api.insee.fr/melodi/file/DS_POPULATIONS_REFERENCE/DS_POPULATIONS_REFERENCE_2023_CSV_FR",
-        "fichier": "insee_populations_2023.zip",
-    },
-}
+# Configuration de la page
+st.set_page_config(
+    page_title="SDIRVE Calvados - Tableau de Bord IRVE",
+    page_icon="⚡",
+    layout="wide",
+)
 
-
-def telecharger(url: str, destination: Path, timeout: int = 60) -> Path:
-    """Télécharge url dans destination et renvoie le chemin du fichier écrit."""
-    # On écrit d'abord dans un .part : un téléchargement coupé ne doit pas laisser
-    # un fichier incomplet qui ressemblerait à un fichier valide.
-    partiel = destination.with_name(destination.name + ".part")
-    try:
-        with requests.get(url, stream=True, timeout=timeout) as reponse:
-            reponse.raise_for_status()
-            with partiel.open("wb") as f:
-                for bloc in reponse.iter_content(chunk_size=1 << 20):
-                    f.write(bloc)
-    except BaseException:
-        partiel.unlink(missing_ok=True)
-        raise
-    partiel.replace(destination)
-    return destination
+sns.set_palette("cividis")
 
 
-def noter_source(nom: str, url: str, chemin: Path, journal: Path = JOURNAL) -> None:
-    """Ajoute au journal la source, son URL, la date et la taille du fichier."""
-    nouveau = not journal.exists()
-    with journal.open("a", newline="", encoding="utf-8") as f:
-        ecrivain = csv.writer(f)
-        if nouveau:
-            ecrivain.writerow(["source", "url", "fichier", "date", "octets"])
-        ecrivain.writerow(
-            [
-                nom,
-                url,
-                chemin.name,
-                datetime.now().isoformat(timespec="seconds"),
-                chemin.stat().st_size,
-            ]
-        )
+@st.cache_data
+def load_data():
+    """Charge les données traitées depuis data/processed/."""
+    data_path = (
+        Path(__file__).resolve().parent.parent
+        / "data"
+        / "processed"
+        / "irve_calvados.parquet"
+    )
+    if not data_path.exists():
+        return None
+    return pd.read_parquet(data_path)
 
 
-def main() -> None:
-    DOSSIER_BRUT.mkdir(parents=True, exist_ok=True)
-    for nom, source in SOURCES.items():
-        chemin = telecharger(source["url"], DOSSIER_BRUT / source["fichier"])
-        noter_source(nom, source["url"], chemin)
-        print(f"{nom} : {chemin.relative_to(RACINE)} ({chemin.stat().st_size} octets)")
-        if zipfile.is_zipfile(chemin):
-            with zipfile.ZipFile(chemin) as archive:
-                archive.extractall(DOSSIER_BRUT)
-                print(f"  extrait : {', '.join(archive.namelist())}")
+df = load_data()
 
+st.title("⚡ Bornes de recharge électrique : où financer les prochaines ?")
+st.caption("Département du Calvados (14) | Source : data.gouv.fr & INSEE")
+if df is None:
+    st.info(
+        "Données en attente : le fichier "
+        "`data/processed/irve_calvados.parquet` n'a pas encore été généré."
+    )
+    st.stop()
 
-if __name__ == "__main__":
-    main()
+# Utilisation des fonctions importées (supprime les erreurs F401)
+kpis = compute_kpis(df)
+df_evol = compute_temporal_evolution(df)
+df_dist = compute_power_distribution(df)
+
+# Affichage des métriques clés
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Points de charge (PDC)", f"{kpis['total_pdc']:,}")
+col2.metric("Stations", f"{kpis['total_stations']:,}")
+col3.metric("Part charge rapide (≥ 50 kW)", f"{kpis['part_rapide']:.1f} %")
+col4.metric("PDC / 10 000 hab.", f"{kpis['ratio_10k']:.1f}")
