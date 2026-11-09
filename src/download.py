@@ -1,15 +1,12 @@
 """src/download.py - Téléchargement et traçabilité des données brutes IRVE."""
 
 import csv
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import requests
 
-URL_IRVE = (
-    "https://www.data.gouv.fr/fr/datasets/r/"
-    "0e917d97-de04-4cc4-b4a1-ec3304b40742"
-)
+URL_IRVE = "https://www.data.gouv.fr/fr/datasets/r/0e917d97-de04-4cc4-b4a1-ec3304b40742"
 
 
 def noter_source(
@@ -25,7 +22,7 @@ def noter_source(
 
     ecrire_entete = not journal_path.exists() or journal_path.stat().st_size == 0
     taille_octets = str(fichier_path.stat().st_size) if fichier_path.exists() else "0"
-    date_iso = datetime.now(timezone.utc).isoformat()
+    date_iso = datetime.now(UTC).isoformat()
 
     with journal_path.open("a", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
