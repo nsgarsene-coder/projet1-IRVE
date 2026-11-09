@@ -1,4 +1,3 @@
-feat/dashboard-restitution
 """
 src/indicators.py - Calculs statistiques et indicateurs métier SDIRVE.
 Conforme aux exigences EF-03, EF-04, EF-07 et QC-03.
@@ -73,4 +72,3 @@ def pdc_par_habitant(irve: pd.DataFrame, population: pd.DataFrame) -> pd.DataFra
     return resultat
 
     # nunique et pas size car un même point de charge peut être déclaré deux fois
- main
