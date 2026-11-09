@@ -1,7 +1,7 @@
 """app/dashboard.py - Tableau de bord décisionnel SDIRVE Calvados (14)."""
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Indique à Python d'inclure le dossier principal du projet pour trouver src
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import streamlit as st
+
 from src.indicators import (
     compute_kpis,
     compute_power_distribution,
@@ -63,9 +64,7 @@ def load_data():
     return pd.DataFrame(
         {
             "id_pdc_itinerance": [f"FR*S14*P{i:04d}" for i in range(n)],
-            "id_station_itinerance": [
-                f"FR*S14*S{i // 3:03d}" for i in range(n)
-            ],
+            "id_station_itinerance": [f"FR*S14*S{i // 3:03d}" for i in range(n)],
             "puissance_nominale": puissances,
             "categorie_puissance": categories,
             "annee_mise_en_service": annees,
@@ -98,9 +97,7 @@ selected_categories = st.sidebar.multiselect(
     default=categories_disponibles,
 )
 
-annees_valides = (
-    df["annee_mise_en_service"].dropna().astype(int).unique().tolist()
-)
+annees_valides = df["annee_mise_en_service"].dropna().astype(int).unique().tolist()
 min_annee, max_annee = min(annees_valides), max(annees_valides)
 selected_annees = st.sidebar.slider(
     "Période de mise en service",
@@ -113,11 +110,7 @@ df_filtered = df[
     (df["categorie_puissance"].isin(selected_categories))
     & (
         (df["annee_mise_en_service"].isna())
-        | (
-            df["annee_mise_en_service"].between(
-                selected_annees[0], selected_annees[1]
-            )
-        )
+        | (df["annee_mise_en_service"].between(selected_annees[0], selected_annees[1]))
     )
 ]
 
