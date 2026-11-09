@@ -23,4 +23,4 @@ request que son traitement. Une fiche par anomalie, numérotée ANO-01, ANO-02, 
 - **Ampleur :** 74 269 lignes vides sur 168 013 (44,2 %) ; 32 lignes antérieures à 2000 ; 1 ligne dans le futur (`2028-08-27`).
 - **Cause probable :** champ facultatif dans le schéma de déclaration. Les années anciennes ressemblent à une valeur par défaut. La date future peut être une mise en service annoncée (hypothèse non vérifiée).
 - **Traitement :** conserver les lignes dans `data/processed/` avec la date mise à vide (`NaT`) pour les 33 dates invalides. Ne pas imputer de date. Exclure ces lignes uniquement des calculs de la question Q3.
-- **Impact :** la question Q3 repose sur 93 711 lignes sur 168 013 (environ 56 %). Cette limite sera écrite dans le README. Les autres questions ne sont pas touchées.
+- **Impact :** au niveau national, la question Q3 repose sur 93 711 lignes sur 168 013 (environ 56 %) ; cette limite sera écrite dans le README. Pour le Calvados, 95,7 % des dates sont lisibles, donc l'impact y est faible. Les autres questions ne sont pas touchées.
