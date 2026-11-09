@@ -55,9 +55,9 @@ def compute_power_distribution(df: pd.DataFrame) -> pd.DataFrame:
     dist.columns = ["Catégorie", "Proportion"]
     return dist
 
+
 """Calcul des indicateurs : bornes par habitant, puissance, mises en service."""
 
-import pandas as pd
 
 # Q1 : zones blanches
 
