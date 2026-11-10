@@ -1,80 +1,71 @@
-"""Téléchargement des données sources (fichier IRVE consolidé, populations INSEE).
-
-Usage : python -m src.download
-"""
+"""src/download.py - Téléchargement et traçabilité des données brutes IRVE."""
 
 import csv
-import zipfile
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import requests
 
-RACINE = Path(__file__).resolve().parent.parent
-DOSSIER_BRUT = RACINE / "data" / "raw"
-JOURNAL = DOSSIER_BRUT / "sources.csv"
-
-SOURCES = {
-    # Lien permanent data.gouv.fr : redirige toujours vers la dernière consolidation.
-    "irve": {
-        "url": "https://www.data.gouv.fr/fr/datasets/r/eb76d20a-8501-400e-b336-d85724de5435",
-        "fichier": "irve_consolide.csv",
-    },
-    # Populations de référence 2023, en vigueur au 1er janvier 2026.
-    "insee": {
-        "url": "https://api.insee.fr/melodi/file/DS_POPULATIONS_REFERENCE/DS_POPULATIONS_REFERENCE_2023_CSV_FR",
-        "fichier": "insee_populations_2023.zip",
-    },
-}
+URL_IRVE = "https://www.data.gouv.fr/fr/datasets/r/0e917d97-de04-4cc4-b4a1-ec3304b40742"
 
 
-def telecharger(url: str, destination: Path, timeout: int = 60) -> Path:
-    """Télécharge url dans destination et renvoie le chemin du fichier écrit."""
-    # On écrit d'abord dans un .part : un téléchargement coupé ne doit pas laisser
-    # un fichier incomplet qui ressemblerait à un fichier valide.
-    partiel = destination.with_name(destination.name + ".part")
+def noter_source(
+    source: str,
+    url: str,
+    fichier: Path | str,
+    journal: Path | str = Path("data/raw/sources.csv"),
+) -> None:
+    """Consigne l'origine et la taille du fichier téléchargé dans le journal CSV."""
+    fichier_path = Path(fichier)
+    journal_path = Path(journal)
+    journal_path.parent.mkdir(parents=True, exist_ok=True)
+
+    ecrire_entete = not journal_path.exists() or journal_path.stat().st_size == 0
+    taille_octets = str(fichier_path.stat().st_size) if fichier_path.exists() else "0"
+    date_iso = datetime.now(UTC).isoformat()
+
+    with journal_path.open("a", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        if ecrire_entete:
+            writer.writerow(["source", "url", "fichier", "date", "octets"])
+        writer.writerow([source, url, fichier_path.name, date_iso, taille_octets])
+
+
+def telecharger(
+    url: str = URL_IRVE,
+    destination: Path | str = Path("data/raw/irve_national.csv"),
+) -> Path:
+    """Télécharge un fichier de données de manière sécurisée (streaming)."""
+    destination_path = Path(destination)
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    fichier_partiel = destination_path.with_suffix(".part")
+
     try:
-        with requests.get(url, stream=True, timeout=timeout) as reponse:
-            reponse.raise_for_status()
-            with partiel.open("wb") as f:
-                for bloc in reponse.iter_content(chunk_size=1 << 20):
-                    f.write(bloc)
-    except BaseException:
-        partiel.unlink(missing_ok=True)
+        response = requests.get(url, stream=True, timeout=30)
+        response.raise_for_status()
+
+        with fichier_partiel.open("wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+        fichier_partiel.replace(destination_path)
+    except Exception:
+        if fichier_partiel.exists():
+            fichier_partiel.unlink()
+        if destination_path.exists():
+            destination_path.unlink()
         raise
-    partiel.replace(destination)
-    return destination
+
+    return destination_path
 
 
-def noter_source(nom: str, url: str, chemin: Path, journal: Path = JOURNAL) -> None:
-    """Ajoute au journal la source, son URL, la date et la taille du fichier."""
-    nouveau = not journal.exists()
-    with journal.open("a", newline="", encoding="utf-8") as f:
-        ecrivain = csv.writer(f)
-        if nouveau:
-            ecrivain.writerow(["source", "url", "fichier", "date", "octets"])
-        ecrivain.writerow(
-            [
-                nom,
-                url,
-                chemin.name,
-                datetime.now().isoformat(timespec="seconds"),
-                chemin.stat().st_size,
-            ]
-        )
-
-
-def main() -> None:
-    DOSSIER_BRUT.mkdir(parents=True, exist_ok=True)
-    for nom, source in SOURCES.items():
-        chemin = telecharger(source["url"], DOSSIER_BRUT / source["fichier"])
-        noter_source(nom, source["url"], chemin)
-        print(f"{nom} : {chemin.relative_to(RACINE)} ({chemin.stat().st_size} octets)")
-        if zipfile.is_zipfile(chemin):
-            with zipfile.ZipFile(chemin) as archive:
-                archive.extractall(DOSSIER_BRUT)
-                print(f"  extrait : {', '.join(archive.namelist())}")
+def download_irve_data(output_dir: str = "data/raw") -> Path:
+    """Télécharge le jeu national IRVE dans le dossier cible."""
+    dest = Path(output_dir) / "irve_national.csv"
+    return telecharger(URL_IRVE, dest)
 
 
 if __name__ == "__main__":
-    main()
+    dest_path = telecharger()
+    noter_source("irve", URL_IRVE, dest_path, Path("data/raw/sources.csv"))

@@ -46,7 +46,7 @@ individuelle et une contribution absente de l'historique est un motif de refus.
 
 ## 5. Pull requests (GIT-02)
 
-1. On ouvre la PR tôt (en brouillon si besoin), avec `Ferme #numero` dans la description.
+1. On ouvre la PR tôt (en brouillon si besoin), avec `Closes #numero` (mot-clé anglais : « Ferme » ne ferme pas l'issue) dans la description.
 2. On remplit la liste de vérification du modèle de PR.
 3. **Au moins un autre membre relit et approuve.** La CI doit être verte.
 4. Le relecteur répond sous **24 h** (48 h le week-end). Il commente le code, pas la personne.
