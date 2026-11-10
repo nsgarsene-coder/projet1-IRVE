@@ -2,7 +2,7 @@
 
 <!-- Une ou deux phrases. Ex. : « Ajoute le calcul du nombre de points de charge pour 10 000 habitants. » -->
 
-Ferme #<!-- numéro de l'issue -->
+Closes #<!-- numéro de l'issue -->
 
 ## Exigences concernées
 
