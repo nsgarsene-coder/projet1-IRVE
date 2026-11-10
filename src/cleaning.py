@@ -64,13 +64,44 @@ def ecrire_parquet(df, chemin):
     df.to_parquet(chemin, index=False)
 
 
+def charger_population(chemin):
+    pop = pd.read_csv(chemin, sep=";", dtype=str)
+    pop = pop[
+        (pop["POPREF_MEASURE"] == "PMUN") & (pop["GEO_OBJECT"].isin(["COM", "ARM"]))
+    ]
+    pop = pop.rename(columns={"GEO": "code_insee_commune", "OBS_VALUE": "population"})
+    pop["population"] = pd.to_numeric(pop["population"])
+    return pop[["code_insee_commune", "population"]]
+
+
+def joindre_population(df, pop):
+    return df.merge(pop, on="code_insee_commune", how="left", validate="many_to_one")
+
+
+def controle_jointure(df):
+    sans_code = df["code_insee_commune"].isna()
+    sans_pop = df["population"].isna() & ~sans_code
+    return {
+        "lignes_sans_code_insee": int(sans_code.sum()),
+        "lignes_code_sans_population": int(sans_pop.sum()),
+        "communes_sans_correspondance": int(
+            df.loc[sans_pop, "code_insee_commune"].nunique()
+        ),
+    }
+
+
 def main():
     brut = pd.read_csv(
         RACINE / "data" / "raw" / "irve_consolide.csv", dtype=str, low_memory=False
     )
     propre = nettoyer(brut)
-    ecrire_parquet(propre, RACINE / "data" / "processed" / "irve_nettoye.parquet")
-    print(len(brut), "->", len(propre), "lignes")
+    pop = charger_population(
+        RACINE / "data" / "raw" / "DS_POPULATIONS_REFERENCE_2023_data.csv"
+    )
+    final = joindre_population(propre, pop)
+    print(controle_jointure(final))
+    ecrire_parquet(final, RACINE / "data" / "processed" / "irve_nettoye.parquet")
+    print(len(brut), "->", len(final), "lignes")
 
 
 if __name__ == "__main__":
