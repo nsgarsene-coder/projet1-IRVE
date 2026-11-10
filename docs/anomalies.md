@@ -24,3 +24,30 @@ request que son traitement. Une fiche par anomalie, numérotée ANO-01, ANO-02, 
 - **Cause probable :** champ facultatif dans le schéma de déclaration. Les années anciennes ressemblent à une valeur par défaut. La date future peut être une mise en service annoncée (hypothèse non vérifiée).
 - **Traitement :** conserver les lignes dans `data/processed/` avec la date mise à vide (`NaT`) pour les 33 dates invalides. Ne pas imputer de date. Exclure ces lignes uniquement des calculs de la question Q3.
 - **Impact :** au niveau national, la question Q3 repose sur 93 711 lignes sur 168 013 (environ 56 %) ; cette limite sera écrite dans le README. Pour le Calvados, 95,7 % des dates sont lisibles, donc l'impact y est faible. Les autres questions ne sont pas touchées.
+
+## ANO-02 : même point de charge déclaré plusieurs fois
+
+- **Colonnes :** `id_pdc_itinerance`
+- **Description :** un même identifiant de point de charge apparaît sur plusieurs lignes, qui ne sont pas identiques sur toutes les colonnes.
+- **Ampleur :** 26 709 lignes concernées ; 154 294 identifiants distincts sur 168 013 lignes, soit 13 719 lignes en trop (8,2 %). Aucune ligne identique à 100 %.
+- **Cause probable :** le fichier consolidé réunit plusieurs jeux de données de data.gouv. Pour les 12 990 identifiants concernés, la ressource, le jeu de données et l'organisation source diffèrent : le même point est déclaré par deux sources (observé sur les colonnes `datagouv_*`).
+- **Traitement :** garder une seule ligne par `id_pdc_itinerance`, celle dont `date_maj` est la plus récente. Les lignes sans `date_maj` passent en dernier.
+- **Impact :** sans ce traitement, tous les comptages de points de charge (Q1, Q2, Q4) seraient surévalués d'environ 8 %.
+
+## ANO-03 : manquants déguisés
+
+- **Colonnes :** `num_pdl`, `restriction_gabarit`
+- **Description :** des valeurs qui signifient « inconnu » sont écrites comme de vraies valeurs : `inconnu`, `x`, « Restriction de gabarit non précisée », `0000000000000`, valeurs blanches. Une partie de `num_pdl` est en notation scientifique (`E+13`), ce qui a détruit l'identifiant.
+- **Ampleur :** `restriction_gabarit` : environ 86 000 lignes (51 %), en plus des 2,06 % de vides. `num_pdl` : plus de 7 800 lignes de valeurs bidon, en plus de 66,9 % de vides.
+- **Cause probable :** saisie libre sans contrôle côté déclarant, et passage par un tableur pour `num_pdl` (hypothèse non vérifiée).
+- **Traitement :** remplacer ces valeurs par une valeur vide (`NaN`) dans `data/processed/`. Garder « Aucune Restriction » comme vraie valeur.
+- **Impact :** les taux de manquants réels sont plus élevés que ceux du profil. Si Q5 utilise `restriction_gabarit`, elle doit le dire. Pas d'impact sur Q1 à Q4.
+
+## ANO-04 : oui/non écrits de plusieurs façons
+
+- **Colonnes :** `paiement_cb`, `gratuit`, `cable_t2_attache`
+- **Description :** la même information est écrite `True`, `true`, `TRUE`, `False`, `false`, `FALSE`, `1` ou `0`, soit 8 valeurs distinctes au lieu de 2.
+- **Ampleur :** `paiement_cb` : 7,3 % de vides, le reste réparti sur les 8 formes. `cable_t2_attache` : 47,9 % de vides (80 434 lignes).
+- **Cause probable :** déclarations venant de sources différentes, sans format imposé (hypothèse non vérifiée).
+- **Traitement :** normaliser en vrai booléen, sans tenir compte de la casse. `1` devient vrai et `0` faux (hypothèse à confirmer), les vides restent vides.
+- **Impact :** Q5 (part des points payables par carte) serait faussée si on ne comptait qu'une seule forme de « vrai ».
