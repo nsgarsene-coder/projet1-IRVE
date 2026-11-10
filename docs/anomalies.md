@@ -30,8 +30,8 @@ request que son traitement. Une fiche par anomalie, numérotée ANO-01, ANO-02, 
 - **Colonnes :** `id_pdc_itinerance`
 - **Description :** un même identifiant de point de charge apparaît sur plusieurs lignes, qui ne sont pas identiques sur toutes les colonnes.
 - **Ampleur :** 26 709 lignes concernées ; 154 294 identifiants distincts sur 168 013 lignes, soit 13 719 lignes en trop (8,2 %). Aucune ligne identique à 100 %.
-- **Cause probable :** déclarations multiples d'un même point par plusieurs déclarants ou à plusieurs dates (hypothèse non vérifiée).
-- **Traitement :** garder une seule ligne par `id_pdc_itinerance`. Le critère de choix (la plus récente ou la plus complète) sera fixé après comparaison des colonnes qui diffèrent.
+- **Cause probable :** le fichier consolidé réunit plusieurs jeux de données de data.gouv. Pour les 12 990 identifiants concernés, la ressource, le jeu de données et l'organisation source diffèrent : le même point est déclaré par deux sources (observé sur les colonnes `datagouv_*`).
+- **Traitement :** garder une seule ligne par `id_pdc_itinerance`, celle dont `date_maj` est la plus récente. Les lignes sans `date_maj` passent en dernier.
 - **Impact :** sans ce traitement, tous les comptages de points de charge (Q1, Q2, Q4) seraient surévalués d'environ 8 %.
 
 ## ANO-03 : manquants déguisés
