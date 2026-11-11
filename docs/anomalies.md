@@ -51,3 +51,12 @@ request que son traitement. Une fiche par anomalie, numérotée ANO-01, ANO-02, 
 - **Cause probable :** déclarations venant de sources différentes, sans format imposé (hypothèse non vérifiée).
 - **Traitement :** normaliser en vrai booléen, sans tenir compte de la casse. `1` devient vrai et `0` faux (hypothèse à confirmer), les vides restent vides.
 - **Impact :** Q5 (part des points payables par carte) serait faussée si on ne comptait qu'une seule forme de « vrai ».
+
+## ANO-05 : code INSEE de la commune absent
+
+- **Colonnes :** `code_insee_commune` (et `consolidated_commune`, `consolidated_code_postal`)
+- **Description :** le code INSEE est vide pour une grande partie des points de charge, ce qui empêche de les rattacher à une commune et de leur associer une population.
+- **Ampleur :** 66 010 lignes sur 154 294 après suppression des doublons (42,8 %).
+- **Cause probable :** champ de géolocalisation consolidée non renseigné quand l'adresse n'a pas pu être rattachée à une commune (hypothèse non vérifiée).
+- **Traitement :** conserver les lignes, ne pas inventer de commune. Exclure ces lignes des calculs par commune (Q1) et indiquer leur part dans les résultats. Récupérer la commune à partir des coordonnées ou du code postal est une piste à décider avec le groupe.
+- **Impact :** Q1 (points de charge pour 10 000 habitants par commune) n'est calculée que sur environ 52 % des lignes. Les taux par commune sont sous-estimés.
