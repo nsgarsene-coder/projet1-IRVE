@@ -37,7 +37,7 @@ request que son traitement. Une fiche par anomalie, numérotée ANO-01, ANO-02, 
 ## ANO-03 : manquants déguisés
 
 - **Colonnes :** `num_pdl`, `restriction_gabarit`
-- **Description :** des valeurs qui signifient « inconnu » sont écrites comme de vraies valeurs : `inconnu`, `x`, « Restriction de gabarit non précisée », `0000000000000`, valeurs blanches. Une partie de `num_pdl` est en notation scientifique (`E+13`), ce qui a détruit l'identifiant.
+- **Description :** des valeurs qui signifient « inconnu » sont écrites comme de vraies valeurs : `inconnu`, `xx`, « Restriction de gabarit non précisée », `0`, `0000000000000`, valeurs blanches. Une partie de `num_pdl` est en notation scientifique (`E+13`), ce qui a détruit l'identifiant.
 - **Ampleur :** `restriction_gabarit` : environ 86 000 lignes (51 %), en plus des 2,06 % de vides. `num_pdl` : plus de 7 800 lignes de valeurs bidon, en plus de 66,9 % de vides.
 - **Cause probable :** saisie libre sans contrôle côté déclarant, et passage par un tableur pour `num_pdl` (hypothèse non vérifiée).
 - **Traitement :** remplacer ces valeurs par une valeur vide (`NaN`) dans `data/processed/`. Garder « Aucune Restriction » comme vraie valeur.
@@ -51,3 +51,21 @@ request que son traitement. Une fiche par anomalie, numérotée ANO-01, ANO-02, 
 - **Cause probable :** déclarations venant de sources différentes, sans format imposé (hypothèse non vérifiée).
 - **Traitement :** normaliser en vrai booléen, sans tenir compte de la casse. `1` devient vrai et `0` faux (hypothèse à confirmer), les vides restent vides.
 - **Impact :** Q5 (part des points payables par carte) serait faussée si on ne comptait qu'une seule forme de « vrai ».
+
+## ANO-05 : code INSEE de la commune absent
+
+- **Colonnes :** `code_insee_commune` (et `consolidated_commune`, `consolidated_code_postal`)
+- **Description :** le code INSEE est vide pour une grande partie des points de charge, ce qui empêche de les rattacher à une commune et de leur associer une population.
+- **Ampleur :** 66 010 lignes sur 154 294 après suppression des doublons (42,8 %).
+- **Cause probable :** champ de géolocalisation consolidée non renseigné quand l'adresse n'a pas pu être rattachée à une commune (hypothèse non vérifiée).
+- **Traitement :** conserver les lignes, ne pas inventer de commune. Exclure ces lignes des calculs par commune (Q1) et indiquer leur part dans les résultats. Récupérer la commune à partir des coordonnées ou du code postal est une piste à décider avec le groupe.
+- **Impact :** Q1 (points de charge pour 10 000 habitants par commune) n'est calculée que sur environ 52 % des lignes. Les taux par commune sont sous-estimés.
+
+## ANO-06 : code postal saisi à la place du code INSEE
+
+- **Colonnes :** `code_insee_commune`
+- **Description :** pour certaines lignes, la colonne du code INSEE contient un code postal (par exemple 33000, 67000, 86000, 77700), qui ne correspond à aucune commune du fichier INSEE.
+- **Ampleur :** 7 239 lignes sur 154 294 (4,7 %), 760 codes différents. Dans le Calvados : 41 lignes sur 1 953 (2,1 %).
+- **Cause probable :** confusion entre code postal et code INSEE à la saisie. Pour 91,6 % des lignes concernées, la valeur de `code_insee_commune` est identique à `consolidated_code_postal`.
+- **Traitement :** conserver les lignes, sans population (la jointure les laisse vides). Pas de correction automatique : un code postal couvre souvent plusieurs communes. Retrouver la commune via les coordonnées est une piste à décider avec le groupe.
+- **Impact :** ces points de charge sont exclus des calculs par commune (Q1). Au niveau du Calvados, l'effet est faible (2,1 %). Rare, mais possible : un code postal qui coïnciderait avec le vrai code INSEE d'une autre commune serait rattaché à tort.
