@@ -26,13 +26,13 @@ def test_supprimer_doublons_garde_la_date_maj_la_plus_recente():
 def test_remplacer_manquants_deguises():
     df = pd.DataFrame(
         {
-            "num_pdl": ["inconnu", "0000000000000", "1.2E+13", "123"],
-            "restriction_gabarit": ["x", "Aucune Restriction", "Inconnu", "non"],
+            "num_pdl": ["inconnu", "0000000000000", "1.2E+13", "123", "0"],
+            "restriction_gabarit": ["xx", "Aucune Restriction", "Inconnu", "non", "x"],
         }
     )
     res = remplacer_manquants_deguises(df)
-    assert res["num_pdl"].isna().sum() == 3
-    assert res["restriction_gabarit"].isna().sum() == 2
+    assert res["num_pdl"].isna().sum() == 4
+    assert res["restriction_gabarit"].isna().sum() == 3
 
 
 def test_normaliser_booleens():

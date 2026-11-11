@@ -37,7 +37,7 @@ request que son traitement. Une fiche par anomalie, numérotée ANO-01, ANO-02, 
 ## ANO-03 : manquants déguisés
 
 - **Colonnes :** `num_pdl`, `restriction_gabarit`
-- **Description :** des valeurs qui signifient « inconnu » sont écrites comme de vraies valeurs : `inconnu`, `x`, « Restriction de gabarit non précisée », `0000000000000`, valeurs blanches. Une partie de `num_pdl` est en notation scientifique (`E+13`), ce qui a détruit l'identifiant.
+- **Description :** des valeurs qui signifient « inconnu » sont écrites comme de vraies valeurs : `inconnu`, `xx`, « Restriction de gabarit non précisée », `0`, `0000000000000`, valeurs blanches. Une partie de `num_pdl` est en notation scientifique (`E+13`), ce qui a détruit l'identifiant.
 - **Ampleur :** `restriction_gabarit` : environ 86 000 lignes (51 %), en plus des 2,06 % de vides. `num_pdl` : plus de 7 800 lignes de valeurs bidon, en plus de 66,9 % de vides.
 - **Cause probable :** saisie libre sans contrôle côté déclarant, et passage par un tableur pour `num_pdl` (hypothèse non vérifiée).
 - **Traitement :** remplacer ces valeurs par une valeur vide (`NaN`) dans `data/processed/`. Garder « Aucune Restriction » comme vraie valeur.

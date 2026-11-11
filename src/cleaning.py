@@ -7,6 +7,7 @@ VALEURS_BIDON = {
     "",
     "inconnu",
     "x",
+    "xx",
     "restriction de gabarit non précisée",
     "0000000000000",
 }
@@ -28,7 +29,11 @@ def remplacer_manquants_deguises(df):
         propre = df[col].str.strip().str.lower()
         masque = propre.isin(VALEURS_BIDON)
         if col == "num_pdl":
-            masque = masque | propre.str.contains("e+", regex=False, na=False)
+            masque = (
+                masque
+                | propre.str.contains("e+", regex=False, na=False)
+                | propre.str.fullmatch(r"0+", na=False)
+            )
         df.loc[masque, col] = pd.NA
     return df
 
