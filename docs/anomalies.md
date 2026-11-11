@@ -60,3 +60,12 @@ request que son traitement. Une fiche par anomalie, numérotée ANO-01, ANO-02, 
 - **Cause probable :** champ de géolocalisation consolidée non renseigné quand l'adresse n'a pas pu être rattachée à une commune (hypothèse non vérifiée).
 - **Traitement :** conserver les lignes, ne pas inventer de commune. Exclure ces lignes des calculs par commune (Q1) et indiquer leur part dans les résultats. Récupérer la commune à partir des coordonnées ou du code postal est une piste à décider avec le groupe.
 - **Impact :** Q1 (points de charge pour 10 000 habitants par commune) n'est calculée que sur environ 52 % des lignes. Les taux par commune sont sous-estimés.
+
+## ANO-06 : code postal saisi à la place du code INSEE
+
+- **Colonnes :** `code_insee_commune`
+- **Description :** pour certaines lignes, la colonne du code INSEE contient un code postal (par exemple 33000, 67000, 86000, 77700), qui ne correspond à aucune commune du fichier INSEE.
+- **Ampleur :** 7 239 lignes sur 154 294 (4,7 %), 760 codes différents. Dans le Calvados : 41 lignes sur 1 953 (2,1 %).
+- **Cause probable :** confusion entre code postal et code INSEE à la saisie. Pour 91,6 % des lignes concernées, la valeur de `code_insee_commune` est identique à `consolidated_code_postal`.
+- **Traitement :** conserver les lignes, sans population (la jointure les laisse vides). Pas de correction automatique : un code postal couvre souvent plusieurs communes. Retrouver la commune via les coordonnées est une piste à décider avec le groupe.
+- **Impact :** ces points de charge sont exclus des calculs par commune (Q1). Au niveau du Calvados, l'effet est faible (2,1 %). Rare, mais possible : un code postal qui coïnciderait avec le vrai code INSEE d'une autre commune serait rattaché à tort.
