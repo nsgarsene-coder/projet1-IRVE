@@ -1,4 +1,5 @@
 import csv
+import zipfile
 
 import pytest
 import requests
@@ -64,3 +65,21 @@ def test_noter_source_ecrit_l_entete_une_seule_fois(tmp_path):
     assert len(lignes) == 3
     assert lignes[1][:3] == ["irve", "https://exemple.fr/f.csv", "f.csv"]
     assert lignes[1][4] == "5"
+
+
+def test_extraire_zip_renvoie_les_fichiers_extraits(tmp_path):
+    archive = tmp_path / "a.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr("data.csv", "GEO;OBS_VALUE\n14118;1000\n")
+
+    noms = download.extraire_zip(archive, tmp_path / "sortie")
+
+    assert noms == ["data.csv"]
+    contenu = (tmp_path / "sortie" / "data.csv").read_text()
+    assert contenu == "GEO;OBS_VALUE\n14118;1000\n"
+
+
+def test_les_sources_ont_les_noms_lus_par_le_nettoyage():
+    assert download.SOURCES["irve"]["fichier"] == "irve_consolide.csv"
+    # Version figée et datée, pas le lien qui suit la dernière consolidation.
+    assert "/r/" not in download.SOURCES["irve"]["url"]
